@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+{% load carton_tags %}
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body class="container">
+    {% include 'header.html' %}
+
+<div class="d-flex p-2" id="shopping-cart">
+    <h1 class="h6 mb-0 text-black lh-1">Shopping Cart</h1>
+</div>
+
+    {% get_cart as cart %}
+    <ul class="list-group">
+        {% for item in cart.items %}
+        <li class="list-group-item" id="book-item-{{ item.product.id }}">
+            <div class="row align-items-center">
+                <div class="col-4 col-md-6 col-lg-7">
+                    <img src="{{ item.product.image_url }}" class="img-fluid" height="100px" width="100px">
+                </div>
+                <div class="col-4 col-md-6 col-lg-7">
+                    {{ item.product }}
+                </div>
+                <div class="col-4 col-md-6 col-lg-7">
+                    <div class="container mt-3 float">
+                        <button data-book_id="{{ item.product.id }}" class="btn btn-danger remove-from-cart-button">Remove from Cart</button>
+                        <a href="javascript:void(0);" onclick="removeFromCart({{ item.product.id }})" class="text-decoration-none text-inherit"></a>
+                    </div>
+                </div>
+            </div>
+        </li>
+    </ul>
+        {% empty %}
+            <div class="row align-items-center">
+                <div class="col col-md col-lg">
+                    <div class="d-flex">Your cart is empty</div>
+            </div>
+        </div>
+        {% endfor %}
+
+    <div id="alert-container"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Function to remove an item from the cart
+            function removeFromCart(bookId) {
+                $.get('/remove/', { book_id: bookId }, function (data) {
+                    if (data.success) {
+                        // Remove the list item from the page
+                        $('#book-item-' + bookId).remove();
+
+                        // Display a success alert
+                        var alert = $('<div class="alert alert-success alert-dismissible fade show" role="alert">Item removed from cart successfully.</div>');
+                        $('#alert-container').append(alert);
+
+                        setTimeout(function () {
+                            alert.alert('close');
+                        }, 3000);
+                     }
+                });
+            }
+            $('.remove-from-cart-button').click(function () {
+                var bookId = $(this).data('book_id');
+                removeFromCart(bookId);
+            });
+        });
+    </script>
+</body>
+
+</html>
